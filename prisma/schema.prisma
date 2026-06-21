@@ -21,6 +21,7 @@ model user {
   phone_number String   @unique @db.VarChar
   id           Int      @id(map: "PK_cace4a159ff9f2512dd42373760") @default(autoincrement())
   created_at   DateTime @db.Timestamp(6)
+  refresh_token_hash   String?
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments

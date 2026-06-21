@@ -22,4 +22,15 @@ export class UsersService {
     });
     return data;
   }
+
+  async updateRefreshToken(userId: number, refreshTokenHash: string) {
+    return await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        refresh_token_hash: refreshTokenHash,
+      },
+    });
+  }
 }
