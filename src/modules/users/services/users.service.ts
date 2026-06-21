@@ -33,4 +33,18 @@ export class UsersService {
       },
     });
   }
+
+  async findById(userId: number) {
+    const data = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (data) {
+      return data;
+    } else {
+      return {
+        success: false,
+        message: 'user not found having this id',
+      };
+    }
+  }
 }
