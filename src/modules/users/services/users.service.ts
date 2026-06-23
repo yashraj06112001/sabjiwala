@@ -33,18 +33,12 @@ export class UsersService {
       },
     });
   }
-
+  // this is to find the user by id and this we are further going to use in our refer Token function and that is why we are creating this function
   async findById(userId: number) {
     const data = await this.prisma.user.findUnique({
       where: { id: userId },
     });
-    if (data) {
-      return data;
-    } else {
-      return {
-        success: false,
-        message: 'user not found having this id',
-      };
-    }
+
+    return data;
   }
 }

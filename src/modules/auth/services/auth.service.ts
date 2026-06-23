@@ -98,6 +98,53 @@ export class AuthService {
     };
   }
 
+  async refreshTokens(refreshToken: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET')!,
+      }); // here we are extracting the payloads from the refresh token
+
+      const user = await this.usersService.findById(payload.sub); // now through payloads we are extracting the user
+
+      if (!user) {
+        return {
+          message: 'User not found',
+        };
+      }
+
+      if (!user.refresh_token_hash) {
+        return {
+          message: 'Refresh token missing',
+        };
+      }
+      // we are finding the that user sended refresh token is same as latest refresh_token or different
+      const isValid = await bcrypt.compare(
+        refreshToken,
+        user.refresh_token_hash,
+      );
+
+      if (!isValid) {
+        return {
+          message: 'Invalid refresh token',
+        };
+      }
+      // as we found that refresh token is valid means we can say user have sended the correct latest refresh token
+      const tokens = await this.generateToken(user.id, user.phone_number); // that is why we created new tokens
+
+      const newHash = await this.hashRefreshToken(tokens.refreshToken); // we again hanshed the refresh token in newHash variable
+
+      await this.usersService.updateRefreshToken(user.id, newHash); // we again updated the refresh token
+
+      return {
+        accessToken: tokens.accessToken, // and this time we are returning  the new access token
+        refreshToken: tokens.refreshToken, // and we are returning the new refresh token as well
+      };
+    } catch {
+      return {
+        message: 'Invalid refresh token',
+      };
+    }
+  }
   async hashRefreshToken(refreshToken: string) {
     return bcrypt.hash(refreshToken, 10);
   } // this is to hash that refreshToken
